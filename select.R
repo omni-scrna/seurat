@@ -7,8 +7,7 @@
 
 suppressPackageStartupMessages({
   library(Seurat)
-  library(anndata)
-  library(HDF5Array)
+  library(anndataR)
   library(data.table)
 })
 
