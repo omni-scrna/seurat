@@ -11,8 +11,9 @@ export-env = "pixi workspace export conda-environment --name $(basename $(git re
 [dependencies]
 r-base = ">=4.5"
 r-seurat = ">=5.0.0"
+bioconductor-anndatar = "*"
+bioconductor-rhdf5 = "*"
 bioconductor-hdf5array = "*"
-r-anndata = "*"
 "r-data.table" = "*"
 r-optparse = "*"
 r-magrittr = "*"

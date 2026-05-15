@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 suppressPackageStartupMessages({
   library(Seurat)
-  library(HDF5Array)
-  library(anndata)
+  library(anndataR)
   library(optparse)
+  library(data.table)
 })
 cat("OK\n")

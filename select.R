@@ -9,6 +9,7 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(anndataR)
   library(data.table)
+  library(HDF5Array)
 })
 
 script_dir <- (function() {

@@ -9,6 +9,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/_r-mutex-1.0.1-anacondar_1.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/binutils_impl_linux-64-2.45.1-default_hfdba357_102.conda
+      - conda: https://conda.anaconda.org/bioconda/noarch/bioconductor-anndatar-1.0.2-r45hdfd78af_0.conda
       - conda: https://conda.anaconda.org/bioconda/noarch/bioconductor-biocgenerics-0.56.0-r45hdfd78af_2.conda
       - conda: https://conda.anaconda.org/bioconda/linux-64/bioconductor-delayedarray-0.36.0-r45h01b2380_0.conda
       - conda: https://conda.anaconda.org/bioconda/linux-64/bioconductor-h5mread-1.2.1-r45h01b2380_1.conda
@@ -97,9 +98,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pixman-0.46.4-h54a6638_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pthread-stubs-0.4-hb9d3cd8_1002.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/r-abind-1.4_8-r45hc72bb7e_1.conda
-      - conda: https://conda.anaconda.org/bioconda/noarch/r-anndata-0.9.0-r45hdfd78af_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/r-askpass-1.2.1-r45h54b55ab_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/r-assertthat-0.2.1-r45hc72bb7e_6.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/r-base-4.5.3-h15dba0b_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/r-base64enc-0.1_6-r45h54b55ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/r-bh-1.90.0_1-r45hc72bb7e_0.conda
@@ -296,6 +295,21 @@ packages:
   license_family: GPL
   size: 3661455
   timestamp: 1774197460085
+- conda: https://conda.anaconda.org/bioconda/noarch/bioconductor-anndatar-1.0.2-r45hdfd78af_0.conda
+  sha256: e570056bad5d1cc475e3a7a4177edccdbffedcc876b3675c18f2c5e2e0a76ef3
+  md5: 599be79d8529acc4862ab793c0097deb
+  depends:
+  - r-base >=4.5,<4.6.0a0
+  - r-cli
+  - r-lifecycle
+  - r-matrix
+  - r-purrr
+  - r-r6 >=2.4.0
+  - r-reticulate >=1.41.1
+  - r-rlang
+  license: MIT + file LICENSE
+  size: 1840072
+  timestamp: 1772821006764
 - conda: https://conda.anaconda.org/bioconda/noarch/bioconductor-biocgenerics-0.56.0-r45hdfd78af_2.conda
   sha256: 97221eda3007381c0a6498608baaebdcec6047f7f26b121c19149fd56aabf032
   md5: 27556377d159490ea87696727ae41808
@@ -1401,19 +1415,6 @@ packages:
   license_family: LGPL
   size: 82526
   timestamp: 1757460261392
-- conda: https://conda.anaconda.org/bioconda/noarch/r-anndata-0.9.0-r45hdfd78af_0.conda
-  sha256: dca31cef68368d14b81580e53de5775a0099d1af0a755ff700197fd382ad4d98
-  md5: 51963c5e7e86bee5d283810910328e9e
-  depends:
-  - r-assertthat
-  - r-base >=4.5,<4.6.0a0
-  - r-matrix
-  - r-r6
-  - r-reticulate >=1.41
-  license: MIT
-  license_family: MIT
-  size: 244356
-  timestamp: 1775101310505
 - conda: https://conda.anaconda.org/conda-forge/linux-64/r-askpass-1.2.1-r45h54b55ab_1.conda
   sha256: 5c4d2bcc1beba7703acbfe1610a846ce2a4010456714705dfa63989cee722a00
   md5: 1ae3c72e90c6a3871c594448d3e152e4
@@ -1426,15 +1427,6 @@ packages:
   license_family: MIT
   size: 31983
   timestamp: 1758383536121
-- conda: https://conda.anaconda.org/conda-forge/noarch/r-assertthat-0.2.1-r45hc72bb7e_6.conda
-  sha256: 90e7ae8aa427274d7d2e510060b68925e60e897ecaa5ea135bb33afa7eb12134
-  md5: b5291c60f52b43108a2973ba6f5885d1
-  depends:
-  - r-base >=4.5,<4.6.0a0
-  license: GPL-3.0-only
-  license_family: GPL3
-  size: 72543
-  timestamp: 1757447376176
 - conda: https://conda.anaconda.org/conda-forge/linux-64/r-base-4.5.3-h15dba0b_1.conda
   sha256: eb21b72dfa6cc767cebc0b348b8da3dc762a7e85627fc7a5afee72cc75e8f89c
   md5: 0356c81af70570e685acc134ac740014
