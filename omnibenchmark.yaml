@@ -2,3 +2,6 @@
 
 entrypoints:
   select: select.R
+  clustering: clustering.R
+
+
