@@ -2,3 +2,4 @@
 
 entrypoints:
   select: select.R
+  rpca: rpca.R
