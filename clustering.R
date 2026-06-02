@@ -60,7 +60,7 @@ parser$add_argument(
   help = "Random seed"
 )
 
-#args <- parser$parse_args()
+args <- parser$parse_args()
 
 
 # Reproducibility
