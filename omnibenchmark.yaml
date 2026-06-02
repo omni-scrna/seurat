@@ -2,4 +2,4 @@
 
 entrypoints:
   select: select.R
-  rpca: rpca.R
+  integrate: integrate.R
