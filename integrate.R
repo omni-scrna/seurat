@@ -7,6 +7,7 @@
 suppressPackageStartupMessages({
   library(Seurat)
   library(SeuratObject)
+  #library(SeuratWrappers) # skipping because object 'FastMNNIntegration' not found
   library(rhdf5)
   library(HDF5Array)
   library(data.table)
@@ -19,7 +20,6 @@ script_dir <- (function() {
   if (length(m) > 0) dirname(sub("^--file=", "", cargs[[m]])) else getwd()
 })()
 source(file.path(script_dir, "src", "cli.R"))
-
 
 main <- function() {
   args <- parse_integrate_args()
@@ -39,12 +39,12 @@ main <- function() {
   # read batch labels from h5ad obs
   cell_ids_h5ad <- as.character(h5read(args$rawdata_h5ad, "obs/_index"))
   batch_raw <- h5read(args$rawdata_h5ad, paste0("obs/", batch_var)) |>
-    as.character(batch_raw)
+    as.character()
   
   # align batch labels to cells in the expression matrix
   cell_ids_mat <- colnames(m)
   idx <- match(cell_ids_mat, cell_ids_h5ad)
-  batch_aligned <- batch_vals[idx]
+  batch_aligned <- batch_raw[idx]
 
   # create Seurat object with normalized data
   message("  Creating Seurat object")
@@ -82,27 +82,38 @@ main <- function() {
   )
 
   # integrate
-  if (args$method == "rpca") {
+  # if (args$method == "rpca") {
     message("  Integrating layers using RPCA")
+    # set k.weight for small batches to prevent
+    # Error: k.weight (100) is set larger than the number of cells in the smallest object (*)
+    batch_sizes = table(batch_aligned)
+    # k.weight must be less than or equal to the total number of anchors
+    # to prevent an error k.weight is set to a value significantly lower than smallest batch size
+    k_weight = min(100, floor(0.5*min(batch_sizes)))
+    
     obj <- IntegrateLayers(
       object        = obj,
       method        = RPCAIntegration,
       orig.reduction = "pca",
       new.reduction = "integrated.rpca",
       k.anchor      = args$k_anchor,
-      verbose       = TRUE
+      verbose       = TRUE, 
+      features      = rownames(obj), 
+      k.weight      = k_weight
     )
     reduction_name <- "integrated.rpca"
-  } else if (args$method == "fastmnn") {
-    message("  Integrating layers using FastMNN")
-    obj <- IntegrateLayers(
-      object        = obj,
-      method        = FastMNNIntegration,
-      new.reduction = "integrated.mnn",
-      verbose       = TRUE
-    )
-    reduction_name <- "integrated.mnn"
-  }
+  #  skipping because object 'FastMNNIntegration' not found
+  #} else if (args$method == "fastmnn") { 
+  #  message("  Integrating layers using FastMNN")
+  #  obj <- IntegrateLayers(
+  #    object        = obj,
+  #    method        = FastMNNIntegration,
+  #    new.reduction = "integrated.mnn",
+  #    verbose       = TRUE, 
+  #    features      = rownames(obj)
+  #  )
+  #  reduction_name <- "integrated.mnn"
+  #}
 
 
   # extract corrected embeddings

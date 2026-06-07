@@ -94,8 +94,6 @@ build_integrate_parser <- function() {
                 help = "YAML file with batch_var field"),
     make_option("--method",                 type = "character",
                 help = "Integration method (rpca, fastmnn)"),
-    make_option("--dims",                   type = "integer", default = 50L,
-                help = "Number of PCA dims for integration"),
     make_option("--k_anchor",               type = "integer", default = 5L,
                 help = "Number of anchors per batch pair (RPCA only)")
   )
@@ -118,7 +116,6 @@ parse_integrate_args <- function() {
     rawdata_h5ad    = raw[["rawdata.h5ad"]],
     properties_info = raw[["properties.info"]],
     method          = raw$method,
-    dims            = raw$dims,
     k_anchor        = raw$k_anchor
   )
 
