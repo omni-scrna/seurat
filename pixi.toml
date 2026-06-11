@@ -18,3 +18,6 @@ bioconductor-hdf5array = "*"
 r-optparse = "*"
 r-magrittr = "*"
 r-yaml = "*"
+# r-obkit is vendored under src/obkit_logger.R because it has no
+# conda-forge/bioconda release (only prefix.dev/edge). Drop the vendor +
+# add this dep back once a build lands on a channel we already use.
