@@ -2,3 +2,4 @@
 
 entrypoints:
   select: select.R
+  integrate: integrate.R

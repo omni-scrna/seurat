@@ -10,6 +10,7 @@ suppressPackageStartupMessages({
   library(anndataR)
   library(data.table)
   library(HDF5Array)
+  library(yaml)
 })
 
 script_dir <- (function() {
