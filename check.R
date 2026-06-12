@@ -4,5 +4,8 @@ suppressPackageStartupMessages({
   library(anndataR)
   library(optparse)
   library(data.table)
+  library(yaml)
+  library(rhdf5)
+  library(HDF5Array)
 })
 cat("OK\n")

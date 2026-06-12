@@ -3,5 +3,4 @@
 entrypoints:
   select: select.R
   clustering: clustering.R
-
-
+  integrate: integrate.R
