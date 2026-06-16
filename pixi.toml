@@ -18,6 +18,7 @@ bioconductor-hdf5array = "*"
 r-optparse = "*"
 r-magrittr = "*"
 r-yaml = "*"
+r-argparser = "*"   # used by the vendored src/common/cli.R helpers
 # TODO: add r-obkit
 
 # Bootstrap tooling, kept out of the (heavy) R default env. `pixi run -e bootstrap

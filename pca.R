@@ -31,9 +31,35 @@ script_dir <- (function() {
   m <- grep("^--file=", cargs)
   if (length(m) > 0) dirname(sub("^--file=", "", cargs[[m]])) else getwd()
 })()
-source(file.path(script_dir, "src", "cli.R"))
+# Vendored shared-CLI engine, namespaced in `cli` (see src/common/cli.R). We own
+# the parser; the helpers add the benchmark's base + five-pca I/O args.
+cli <- new.env()
+source(file.path(script_dir, "src", "common", "cli.R"), local = cli)
 source(file.path(script_dir, "src", "obkit_logger.R"))
 source(file.path(script_dir, "src", "phases.R"))
+
+
+parse_pca_args <- function() {
+  p <- arg_parser("PCA module (Seurat)")
+  p <- cli$add_base_args(p)               # --output_dir, --name
+  p <- cli$add_stage_args(p, "five-pca")  # --normalized_selected.h5
+  p <- add_argument(p, "--solver",       type = "character", help = "PCA solver (exact, approximate)")
+  p <- add_argument(p, "--n_components", type = "integer",   help = "Number of principal components")
+  p <- add_argument(p, "--random_seed",  type = "integer",   help = "Seed for reproducibility")
+  raw <- parse_args(p)
+
+  args <- list(
+    output_dir = raw$output_dir, name = raw$name,
+    input_h5 = raw[["normalized_selected.h5"]],
+    solver = raw$solver, n_components = raw$n_components, random_seed = raw$random_seed
+  )
+  # The R helpers don't enforce required/choices — check by hand.
+  missing <- names(args)[vapply(args, function(v) is.null(v) || is.na(v), logical(1))]
+  if (length(missing) > 0) stop("Missing required argument(s): ", paste(missing, collapse = ", "))
+  if (!(args$solver %in% c("exact", "approximate")))
+    stop("Invalid --solver: ", args$solver, " (valid: exact, approximate)")
+  args
+}
 
 
 run_pca <- function(so, X, args, phase) {
