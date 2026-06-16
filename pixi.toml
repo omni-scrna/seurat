@@ -18,6 +18,25 @@ bioconductor-hdf5array = "*"
 r-optparse = "*"
 r-magrittr = "*"
 r-yaml = "*"
-# r-obkit is vendored under src/obkit_logger.R because it has no
-# conda-forge/bioconda release (only prefix.dev/edge). Drop the vendor +
-# add this dep back once a build lands on a channel we already use.
+# TODO: add r-obkit
+
+# Bootstrap tooling, kept out of the (heavy) R default env. `pixi run -e bootstrap
+# sync` vendors the shared common/ under src/common/ (the R engine cli.R + the
+# benchmark's stage schemas) — no sibling checkout needed: it fetches pull.py from
+# the boilerplate over HTTP and runs it. pull.py is a *Python* script (CWD-relative,
+# only needs pyyaml + git), independent of this module's R toolchain; `lang: r` in
+# omnibenchmark.yaml is what makes it vendor the R engine. Which branch the SCRIPT
+# is fetched from is `$BRANCH` (default main); override to test an unmerged
+# boilerplate branch:  BRANCH=my-branch pixi run -e bootstrap sync
+# The vendored CONTENT comes from `boilerplate.ref` (and each benchmark's `ref`) in
+# omnibenchmark.yaml — set those to the branch to test unmerged content too.
+[feature.bootstrap.dependencies]
+python = ">=3.11"
+pyyaml = ">=6"
+curl = "*"
+
+[feature.bootstrap.tasks]
+sync = "sh -c 'curl -fsSL https://raw.githubusercontent.com/omni-scrna/boilerplate/${BRANCH:-main}/scripts/pull.py | python -'"
+
+[environments]
+bootstrap = { features = ["bootstrap"], no-default-feature = true }

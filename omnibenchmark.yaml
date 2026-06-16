@@ -4,3 +4,17 @@ entrypoints:
   select: select.R
   integrate: integrate.R
   pca: pca.R
+
+# Shared CLI helpers (R) vendored under src/common/ via `pixi run -e bootstrap sync`.
+boilerplate:
+  repo: https://github.com/omni-scrna/boilerplate
+  ref: main            # the engine lives on boilerplate main
+  lang: r
+
+# Benchmark(s) this module plugs into; `sync` vendors each one's schema/ dir into
+# src/common/schema/. Tracking the unmerged contract branch for now.
+benchmarks:
+  - name: split-stages
+    repo: https://github.com/omni-scrna/split-stages-plan
+    plan: benchmark_conda.yaml
+    ref: feat/contract-fixtures
