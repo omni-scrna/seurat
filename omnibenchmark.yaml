@@ -4,3 +4,4 @@ entrypoints:
   select: select.R
   integrate: integrate.R
   pca: pca.R
+  bpcells-convert: bpcells_convert.R

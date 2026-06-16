@@ -2,16 +2,23 @@
 # PCA module (Seurat-backed) for omnibenchmark.
 #
 # Solvers:
-#   approximate — Seurat::RunPCA(approx = TRUE)  [IRLBA]
-#   exact       — Seurat::RunPCA(approx = FALSE) [full SVD]
+#   approximate          Seurat::RunPCA(approx = TRUE)  [IRLBA]
+#   exact                Seurat::RunPCA(approx = FALSE) [full SVD]
+#   bpcells-approximate  same as approximate, but input is a tarball'd
+#                        BPCells dir; the Assay layers stay BPCells-backed
+#                        so ScaleData skips the dense materialization.
+#   bpcells-exact        same as exact, but BPCells-backed input.
 #
 # Phases (obkit-events.jsonl):
-#   load      h5 -> dgCMatrix -> Seurat object (everything that gets the input
-#             into the framework's expected in-memory form).
-#   densify   ScaleData(do.scale = FALSE) — allocates a dense
-#             (n_genes × n_cells) double matrix in the `scale.data` layer
-#             because that's what RunPCA reads from. This is the memory
-#             elephant for Seurat: ~n_genes * n_cells * 8 bytes.
+#   load      ingest input into framework form.
+#             - in-memory path: h5 -> dgCMatrix -> Seurat object
+#             - bpcells path:   untar -> open_matrix_dir() -> Seurat v5 Assay
+#   densify   ScaleData(do.scale = FALSE).
+#             - in-memory path: allocates a dense (n_genes × n_cells) double
+#               matrix in scale.data — the Seurat memory elephant
+#             - bpcells path:   keeps scale.data as a BPCells-wrapped transform
+#               (no dense materialization). Phase still recorded; expected
+#               to be much shorter / lower-RSS.
 #   pca       RunPCA (IRLBA or full SVD).
 #   write     TSV serialization.
 #
@@ -26,6 +33,16 @@ suppressPackageStartupMessages({
   library(jsonlite)  # logger emits via toJSON; satisfied transitively by Seurat
 })
 
+# BPCells is optional — only required for bpcells-* solver tokens. Load lazily
+# so the in-memory solvers don't pay the import cost (and so the module still
+# runs in environments without BPCells installed).
+.maybe_load_bpcells <- function() {
+  if (!requireNamespace("BPCells", quietly = TRUE)) {
+    stop("BPCells is not installed but a bpcells-* solver was requested. ",
+         "Add r-bpcells to the seurat conda env.")
+  }
+}
+
 script_dir <- (function() {
   cargs <- commandArgs(trailingOnly = FALSE)
   m <- grep("^--file=", cargs)
@@ -38,12 +55,16 @@ source(file.path(script_dir, "src", "phases.R"))
 
 run_pca <- function(so, X, args, phase) {
   # so: Seurat object with `counts` + `data` layers populated from X.
-  # X:  the same gene-by-cell sparse dgCMatrix (kept for total_var).
+  # X:  the gene-by-cell input (dgCMatrix for in-memory solvers, IterableMatrix
+  #     for bpcells-* solvers). Used only for total_var; rowSums/rowSums(.^2)
+  #     work on both representations.
   set.seed(args$random_seed)
 
   approx <- switch(args$solver,
-    approximate = TRUE,
-    exact       = FALSE,
+    approximate         = TRUE,
+    exact               = FALSE,
+    `bpcells-approximate` = TRUE,
+    `bpcells-exact`       = FALSE,
     stop("unknown solver: ", args$solver)
   )
 
@@ -101,20 +122,41 @@ main <- function() {
   dir.create(args$output_dir, showWarnings = FALSE, recursive = TRUE)
   logger_init(args$output_dir)
 
+  uses_bpcells <- startsWith(args$solver, "bpcells-")
+  if (uses_bpcells) .maybe_load_bpcells()
+
   loaded <- phase("load", function(attrs) {
-    # TENxMatrix is lazy/disk-backed; as(., dgCMatrix) materializes it
-    # in memory. CreateSeuratObject + SetAssayData wrap the sparse matrix
-    # in Seurat's container — sparse-pointer-cheap but allocates metadata
-    # (cell IDs as factor levels, etc.). All three steps are "ingest into
-    # framework-native form" so they belong in `load`.
-    m_lazy <- TENxMatrix(args$input_h5, group = "matrix")
-    m_mem  <- as(m_lazy, "dgCMatrix")
-    so     <- CreateSeuratObject(counts = m_mem)
-    so     <- SetAssayData(so, layer = "data", new.data = m_mem)
-    attrs$n_genes <- nrow(m_mem)
-    attrs$n_cells <- ncol(m_mem)
-    attrs$nnz     <- as.integer(length(m_mem@x))
-    list(X = m_mem, so = so)
+    attrs$backend <- if (uses_bpcells) "bpcells" else "in-memory"
+    if (uses_bpcells) {
+      # Untar the BPCells dir under a job-scoped tempdir, open_matrix_dir()
+      # gives a streaming IterableMatrix. Wrap it in a v5 Assay; Seurat keeps
+      # the counts/data layers BPCells-backed, so ScaleData later wraps a
+      # transform rather than materializing a dense matrix.
+      bp_root <- file.path(tempdir(), sprintf("%s_bpcells_in", args$name))
+      if (dir.exists(bp_root)) unlink(bp_root, recursive = TRUE)
+      dir.create(bp_root, recursive = TRUE)
+      untar(args$bpcells_tar, exdir = bp_root)
+      sub <- list.dirs(bp_root, recursive = FALSE)
+      if (length(sub) != 1L) {
+        stop("expected exactly one BPCells dir in tarball, found: ", length(sub))
+      }
+      m <- BPCells::open_matrix_dir(sub)
+      assay <- CreateAssay5Object(counts = m)
+      so    <- CreateSeuratObject(counts = assay)
+      so    <- SetAssayData(so, layer = "data", new.data = m)
+      attrs$n_genes <- nrow(m)
+      attrs$n_cells <- ncol(m)
+      list(X = m, so = so)
+    } else {
+      m_lazy <- TENxMatrix(args$input_h5, group = "matrix")
+      m_mem  <- as(m_lazy, "dgCMatrix")
+      so     <- CreateSeuratObject(counts = m_mem)
+      so     <- SetAssayData(so, layer = "data", new.data = m_mem)
+      attrs$n_genes <- nrow(m_mem)
+      attrs$n_cells <- ncol(m_mem)
+      attrs$nnz     <- as.integer(length(m_mem@x))
+      list(X = m_mem, so = so)
+    }
   })
   cat(sprintf("  matrix (genes x cells): %d x %d\n",
               nrow(loaded$X), ncol(loaded$X)))

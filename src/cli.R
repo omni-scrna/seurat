@@ -148,10 +148,12 @@ build_pca_parser <- function() {
                 help = "Output directory for results"),
     make_option("--name", type = "character",
                 help = "Module name/identifier"),
-    make_option("--normalized_selected.h5", type = "character",
-                help = "TENx-format HDF5 of normalized expression (genes x cells)"),
+    make_option("--normalized_selected.h5", type = "character", default = NULL,
+                help = "TENx-format HDF5 input (required for exact/approximate solvers)"),
+    make_option("--bpcells.tar.gz", type = "character", default = NULL,
+                help = "Tar.gz of a BPCells dir (required for bpcells-* solvers)"),
     make_option("--solver", type = "character",
-                help = "PCA solver (seurat: exact, approximate)"),
+                help = "PCA solver (exact, approximate, bpcells-exact, bpcells-approximate)"),
     make_option("--n_components", type = "integer",
                 help = "Number of principal components to compute"),
     make_option("--random_seed", type = "integer",
@@ -172,23 +174,70 @@ parse_pca_args <- function() {
     output_dir      = raw$output_dir,
     name            = raw$name,
     input_h5        = raw[["normalized_selected.h5"]],
+    bpcells_tar     = raw[["bpcells.tar.gz"]],
     solver          = raw$solver,
     n_components    = raw$n_components,
     random_seed     = raw$random_seed
   )
 
-  required <- names(args)
+  required <- c("output_dir", "name", "solver", "n_components", "random_seed")
   missing <- required[vapply(args[required], function(v) is.null(v) || is.na(v),
                              logical(1))]
   if (length(missing) > 0) {
     stop("Missing required argument(s): ", paste(missing, collapse = ", "))
   }
 
-  valid_solvers <- c("exact", "approximate")
+  valid_solvers <- c("exact", "approximate", "bpcells-exact", "bpcells-approximate")
   if (!(args$solver %in% valid_solvers)) {
     stop("Invalid --solver: ", args$solver,
          " (valid: ", paste(valid_solvers, collapse = ", "), ")")
   }
 
+  uses_bpcells <- startsWith(args$solver, "bpcells-")
+  if (uses_bpcells) {
+    if (is.null(args$bpcells_tar) || is.na(args$bpcells_tar)) {
+      stop("--bpcells.tar.gz is required for solver '", args$solver, "'")
+    }
+  } else {
+    if (is.null(args$input_h5) || is.na(args$input_h5)) {
+      stop("--normalized_selected.h5 is required for solver '", args$solver, "'")
+    }
+  }
+
+  args
+}
+
+
+build_bpcells_convert_parser <- function() {
+  option_list <- list(
+    make_option("--output_dir", type = "character",
+                help = "Output directory for results"),
+    make_option("--name", type = "character",
+                help = "Module name/identifier"),
+    make_option("--normalized_selected.h5", type = "character",
+                help = "TENx-format HDF5 of normalized, selected expression (genes x cells)")
+  )
+
+  OptionParser(
+    option_list = option_list,
+    description = "OmniBenchmark BPCells conversion module (Seurat)"
+  )
+}
+
+parse_bpcells_convert_args <- function() {
+  parser <- build_bpcells_convert_parser()
+  raw <- parse_args(parser)
+
+  args <- list(
+    output_dir = raw$output_dir,
+    name       = raw$name,
+    input_h5   = raw[["normalized_selected.h5"]]
+  )
+  required <- names(args)
+  missing <- required[vapply(args[required], function(v) is.null(v) || is.na(v),
+                             logical(1))]
+  if (length(missing) > 0) {
+    stop("Missing required argument(s): ", paste(missing, collapse = ", "))
+  }
   args
 }

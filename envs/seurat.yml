@@ -5,11 +5,12 @@ channels:
 - bioconda
 - nodefaults
 dependencies:
-- r-base >=4.5
+- r-base >=4.4
 - r-seurat >=5.0.0
-- bioconductor-anndatar *
 - bioconductor-rhdf5 *
 - bioconductor-hdf5array *
 - r-data.table *
 - r-optparse *
 - r-magrittr *
+- r-yaml *
+- r-bpcells *

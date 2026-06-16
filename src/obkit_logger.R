@@ -1,9 +1,9 @@
 # Vendored from omnibenchmark/obkit @ r/obkit/R/logger.R (MIT).
-# Reason: r-obkit has no CRAN/conda-forge/bioconda release — the only
-# published build lives on prefix.dev/edge. Vendoring this one small
-# logger avoids pulling that extra channel into the solve. Drop the
-# vendored copy and switch back to library(obkit) once a conda-forge or
-# bioconda build exists. Same wire format — denet alignment is unaffected.
+# Reason: r-obkit on prefix.dev/edge requires r-base >=4.5, but
+# r-bpcells on bioconda is currently pinned to r-base >=4.4,<4.5.
+# Drop the vendored copy and switch back to library(obkit) once a
+# matching r-obkit build for R 4.4 lands (or r-bpcells bumps to 4.5).
+# Same wire format — denet alignment is unaffected.
 
 .obkit_state <- new.env(parent = emptyenv())
 .obkit_state$log_file <- NULL
