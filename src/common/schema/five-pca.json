@@ -1,0 +1,8 @@
+{
+  "stage": "five-pca",
+  "version": "0.1.0",
+  "benchmark": "omni-scrna/split-stages-plan",
+  "args": [
+    { "flag": "--normalized_selected.h5", "dest": "input_h5", "type": "path", "help": "Normalized, gene-selected matrix H5 (output from four-select stage)" }
+  ]
+}
