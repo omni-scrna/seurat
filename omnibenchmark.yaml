@@ -6,7 +6,7 @@ entrypoints:
   pca: pca.R
 
 # Shared CLI helpers (R) vendored under src/common/ via `pixi run -e bootstrap sync`.
-boilerplate:
+templates:
   repo: https://github.com/omni-scrna/boilerplate
   ref: main            # the engine lives on boilerplate main
   lang: r
