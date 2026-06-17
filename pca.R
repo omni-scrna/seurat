@@ -64,7 +64,7 @@ parse_pca_args <- function() {
 
 run_pca <- function(so, X, args, phase) {
   # so: Seurat object with `counts` + `data` layers populated from X.
-  # X:  the same gene-by-cell sparse dgCMatrix (kept for total_var).
+  # X:  the same gene-by-cell sparse dgCMatrix (for gene/cell ids + PCA features).
   set.seed(args$random_seed)
 
   approx <- switch(args$solver,
@@ -91,29 +91,15 @@ run_pca <- function(so, X, args, phase) {
            verbose = FALSE)
   })
 
-  red       <- so[["pca"]]
-  embedding <- Embeddings(red)              # (n_cells, n_components)
-  loadings  <- Loadings(red)                # (n_genes, n_components)
-  stdev     <- Stdev(red)
-  variance  <- as.numeric(stdev^2)
-
-  # total variance: sum of per-gene variances on the centered matrix
-  # (matches Seurat's PCA input). Computed sparse-safe on X (genes x cells).
-  n   <- ncol(X)
-  rs2 <- Matrix::rowSums(X^2)
-  rs1 <- Matrix::rowSums(X)
-  total_var <- sum((rs2 - rs1^2 / n) / (n - 1))
-
-  variance_ratio <- variance / total_var
+  dimred    <- so[["pca"]]
+  embedding <- Embeddings(dimred)           # (n_cells, n_components)
+  loadings  <- Loadings(dimred)             # (n_genes, n_components)
   rownames(embedding) <- colnames(X)
   colnames(embedding) <- paste0("PC", seq_len(ncol(embedding)))
+  rownames(loadings)  <- rownames(X)
+  colnames(loadings)  <- paste0("PC", seq_len(ncol(loadings)))
 
-  list(
-    embedding      = embedding,
-    loadings       = matrix(as.double(loadings), nrow = nrow(loadings)),
-    variance       = as.double(variance),
-    variance_ratio = as.double(variance_ratio)
-  )
+  list(embedding = embedding, loadings = loadings)
 }
 
 main <- function() {
@@ -151,12 +137,15 @@ main <- function() {
               nrow(res$loadings),  ncol(res$loadings)))
 
   phase("write", function(attrs) {
-    out <- file.path(args$output_dir, sprintf("%s_pcas.tsv", args$name))
-    cat("output_file:", out, "\n")
-    fwrite(data.frame(cell_id = rownames(res$embedding), res$embedding), out,
+    out_pcas <- file.path(args$output_dir, sprintf("%s_pcas.tsv", args$name))
+    fwrite(data.frame(cell_id = rownames(res$embedding), res$embedding), out_pcas,
            sep = "\t", quote = FALSE, row.names = FALSE)
-    attrs$path <- out
-    cat(sprintf("  wrote: %s\n", out))
+    out_loadings <- file.path(args$output_dir, sprintf("%s_loadings.tsv", args$name))
+    fwrite(data.frame(gene = rownames(res$loadings), res$loadings), out_loadings,
+           sep = "\t", quote = FALSE, row.names = FALSE)
+    attrs$pcas     <- out_pcas
+    attrs$loadings <- out_loadings
+    cat(sprintf("  wrote: %s\n  wrote: %s\n", out_pcas, out_loadings))
   })
 }
 
