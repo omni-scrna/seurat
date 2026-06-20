@@ -27,8 +27,12 @@ args <- parse_args(p)                    # argparser's own parser
 # logging
 cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
 
-cat(args$properties_info)
-cat(args$properties.info)
+cat(sprintf("LOG: command line args\n----------------------------------\n"))
+for (i in 1:length(args)) {
+  cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
+}
+cat(sprintf("----------------------------------\n"))
+
 
 # from properties input, get batch variable
 props <- yaml::read_yaml(args$properties_info)
