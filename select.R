@@ -24,13 +24,15 @@ p <- add_argument(p, "--number_selected", type = "integer", help = "number of PC
 args <- parse_args(p)                    # argparser's own parser
 
 
+# logging
+cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
+
 # from properties input, get batch variable
 props <- yaml::read_yaml(args$properties_info)
 if (is.null(props$batch_var) || props$batch_var == "") {
   stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
 }
 args$batch_variable <- props$batch_var
-
 
 # logging
 cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
