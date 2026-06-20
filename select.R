@@ -19,8 +19,18 @@ p <- arg_parser("FEAT module")
 p <- add_base_args(p)                    # --output_dir, --name
 p <- add_stage_args(p, "FEAT")     # the stage I/O contract
 # your own method params — argparser directly (its add_argument requires `help`):
+p <- add_argument(p, "--selection_type", type = "character", help = "type of feature selection")
 p <- add_argument(p, "--number_selected", type = "integer", help = "number of PCs")
 args <- parse_args(p)                    # argparser's own parser
+
+
+# from properties input, get batch variable
+props <- yaml::read_yaml(args$properties_info)
+if (is.null(props$batch_var) || props$batch_var == "") {
+  stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
+}
+args$batch_variable <- props$batch_var
+
 
 # logging
 cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
@@ -62,12 +72,6 @@ run_select <- function(args) {
 }
 
 main <- function() {
-  cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
-  for (k in c("output_dir", "name", "input_h5", "rawdata_h5ad",
-              "filtered_cellids", "selection_type", "number_selected", "batch_variable")) {
-    cat(sprintf("  %s: %s\n", k, args[[k]]))
-  }
-
   dir.create(args$output_dir, showWarnings = FALSE, recursive = TRUE)
 
   sel_feats <- run_select(args)
