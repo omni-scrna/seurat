@@ -72,7 +72,7 @@ main <- function() {
   obj[["RNA"]] <- split(obj[["RNA"]], f = obj[[batch_var, drop = TRUE]])
 
   # read global PCA embeddings
-  pca_df <- fread(args$pcas_tsv)
+  pca_df <- fread(args$pcas.tsv)
   pc_cols <- colnames(pca_df)[grep("^PC", colnames(pca_df))]
   embedding <- as.matrix(pca_df[, ..pc_cols])
   rownames(embedding) <- pca_df$cell_id
