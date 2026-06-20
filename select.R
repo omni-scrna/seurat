@@ -42,8 +42,8 @@ cat(sprintf("----------------------------------\n"))
 
 
 run_select <- function(args) {
-  so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
-  cellids <- readLines(gzfile(args$filtered_cellids))
+  so <- read_h5ad(args$rawdata.h5ad, as = "Seurat")
+  cellids <- readLines(gzfile(args$filtered.cellids))
   so <- subset(so, cells = cellids)
   cat(sprintf("  dim(so) after filtering: %d x %d\n", nrow(so), ncol(so)))
 
