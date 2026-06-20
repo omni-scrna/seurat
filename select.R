@@ -76,7 +76,7 @@ main <- function() {
 
   sel_feats <- run_select(args)
 
-  m <- TENxMatrix(args$input_h5, group = "matrix")
+  m <- TENxMatrix(args$normalized.h5, group = "matrix")
   m <- as(m, "dgCMatrix")
 
   out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))
