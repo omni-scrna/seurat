@@ -48,12 +48,12 @@ main <- function() {
 
   # read normalized selected expression matrix
   message("  Reading expression matrix")
-  m <- TENxMatrix(args$input_h5, group = "matrix")
+  m <- TENxMatrix(args$normalized_selected.h5, group = "matrix")
   m <- as(m, "dgCMatrix")
  
   # read batch labels from h5ad obs
-  cell_ids_h5ad <- as.character(h5read(args$rawdata_h5ad, "obs/_index"))
-  batch_raw <- h5read(args$rawdata_h5ad, paste0("obs/", batch_var)) |>
+  cell_ids_h5ad <- as.character(h5read(args$rawdata.h5ad, "obs/_index"))
+  batch_raw <- h5read(args$rawdata.h5ad, paste0("obs/", batch_var)) |>
     as.character()
   
   # align batch labels to cells in the expression matrix
@@ -78,7 +78,7 @@ main <- function() {
   rownames(embedding) <- pca_df$cell_id
 
   # read global PCA loadings
-  loadings_df <- fread(args$loadings_tsv)
+  loadings_df <- fread(args$loadings.tsv)
   loadings_mat <- as.matrix(loadings_df[, ..pc_cols])
   rownames(loadings_mat) <- loadings_df$gene
 
