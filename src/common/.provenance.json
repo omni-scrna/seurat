@@ -11,7 +11,7 @@
       "benchmark": "split-stages",
       "repo": "https://github.com/omni-scrna/split-stages-plan",
       "ref": "new-stage-naming",
-      "commit": "269fbb2429cce516633e06b02d371beea21c543c",
+      "commit": "71299d682247f59d2d5b1162288b7e280b15fb9a",
       "files": [
         "ANNO",
         "CLUST-M",
@@ -27,5 +27,5 @@
       ]
     }
   ],
-  "fetched_at": "2026-06-20T15:28:23Z"
+  "fetched_at": "2026-06-22T05:37:10Z"
 }

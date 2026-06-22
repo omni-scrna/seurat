@@ -26,7 +26,7 @@ args <- parse_args(p)                    # argparser's own parser
 
 
 # from properties input, get batch variable
-props <- yaml::read_yaml(args$properties.info)
+props <- yaml::read_yaml(args$properties_info)
 if (is.null(props$batch_var) || props$batch_var == "") {
   stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
 }
@@ -42,8 +42,8 @@ cat(sprintf("----------------------------------\n"))
 
 
 run_select <- function(args) {
-  so <- read_h5ad(args$rawdata.h5ad, as = "Seurat")
-  cellids <- readLines(gzfile(args$filtered.cellids))
+  so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
+  cellids <- readLines(gzfile(args$filtered_cellids))
   so <- subset(so, cells = cellids)
   cat(sprintf("  dim(so) after filtering: %d x %d\n", nrow(so), ncol(so)))
 
@@ -76,7 +76,7 @@ main <- function() {
 
   sel_feats <- run_select(args)
 
-  m <- TENxMatrix(args$normalized.h5, group = "matrix")
+  m <- TENxMatrix(args$normalized_h5, group = "matrix")
   m <- as(m, "dgCMatrix")
 
   out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))

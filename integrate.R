@@ -26,9 +26,9 @@ p <- add_argument(p, "--k_anchor", type = "integer", help = "number of PCs")
 args <- parse_args(p)                      # argparser's own parser
 
 # from properties input, get batch variable
-props <- yaml::read_yaml(args$properties.info)
+props <- yaml::read_yaml(args$properties_info)
 if (is.null(props$batch_var) || props$batch_var == "") {
-  stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
+  stop("batch_var is required in properties_info for selection_type 'seurat_vst_batch'")
 }
 args$batch_variable <- props$batch_var
 
@@ -48,12 +48,12 @@ main <- function() {
 
   # read normalized selected expression matrix
   message("  Reading expression matrix")
-  m <- TENxMatrix(args$normalized_selected.h5, group = "matrix")
+  m <- TENxMatrix(args$normalized_selected_h5, group = "matrix")
   m <- as(m, "dgCMatrix")
  
   # read batch labels from h5ad obs
-  cell_ids_h5ad <- as.character(h5read(args$rawdata.h5ad, "obs/_index"))
-  batch_raw <- h5read(args$rawdata.h5ad, paste0("obs/", batch_var)) |>
+  cell_ids_h5ad <- as.character(h5read(args$rawdata_h5ad, "obs/_index"))
+  batch_raw <- h5read(args$rawdata_h5ad, paste0("obs/", batch_var)) |>
     as.character()
   
   # align batch labels to cells in the expression matrix
@@ -72,13 +72,13 @@ main <- function() {
   obj[["RNA"]] <- split(obj[["RNA"]], f = obj[[batch_var, drop = TRUE]])
 
   # read global PCA embeddings
-  pca_df <- fread(args$pcas.tsv)
+  pca_df <- fread(args$pcas_tsv)
   pc_cols <- colnames(pca_df)[grep("^PC", colnames(pca_df))]
   embedding <- as.matrix(pca_df[, ..pc_cols])
   rownames(embedding) <- pca_df$cell_id
 
   # read global PCA loadings
-  loadings_df <- fread(args$loadings.tsv)
+  loadings_df <- fread(args$loadings_tsv)
   loadings_mat <- as.matrix(loadings_df[, ..pc_cols])
   rownames(loadings_mat) <- loadings_df$gene
 
