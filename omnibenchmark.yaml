@@ -4,6 +4,7 @@ entrypoints:
   select: select.R
   integrate: integrate.R
   pca: pca.R
+  cluster: cluster.R
 
 # Shared CLI helpers (R) vendored under src/common/ via `pixi run -e bootstrap sync`.
 templates:
