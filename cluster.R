@@ -74,7 +74,7 @@ cat("Algorithm ID:", algorithm_seurat_id, "\n\n")
 
 
 # Extract clusters matrix
-m_clusters <- data.frame(cell_ids, = colnames(so),
+m_clusters <- data.frame(cell_ids = colnames(so),
                          cluster = as.character(so$seurat_clusters))
 
 cat("Cluster matrix dimensions:\n")
