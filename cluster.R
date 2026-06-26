@@ -97,7 +97,7 @@ cat("Writing output to:\n")
 cat(output_file, "\n\n")
 
 write.table(
-  m_clusters,
+  t(m_clusters),
   file = output_file,
   sep = "\t",
   quote = FALSE,
