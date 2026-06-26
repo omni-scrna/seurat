@@ -7,26 +7,10 @@ suppressPackageStartupMessages({
   library(Matrix)
 })
 
-# Read a CSR-stored graph from a *_neighbors.h5 file into a (symmetric) sparse
-# matrix. The graph lives under `group` as scipy CSR triples (data/indices/indptr,
-# 0-based) with cell barcodes at /cell_ids. Matrix::sparseMatrix reads the
-# row-compressed layout directly via p + j with index1 = FALSE and returns a
-# column-compressed dgCMatrix, which is what Seurat::as.Graph expects.
-# (HDF5Array::H5SparseMatrix won't work here: the group carries no shape
-# dataset/attr, so it can't infer the matrix dimensions.)
-read_neighbors <- function(path, group = "connectivities") {
-  ids <- as.character(h5read(path, "cell_ids"))
-  n <- length(ids)
-
-  sparseMatrix(
-    p    = h5read(path, paste0(group, "/indptr")),
-    j    = h5read(path, paste0(group, "/indices")),  # 0-based column indices
-    x    = as.numeric(h5read(path, paste0(group, "/data"))),
-    dims = c(n, n),
-    index1   = FALSE,
-    dimnames = list(ids, ids)
-  )
-}
+# read_neighbors(): load a CSR neighbors graph from a *_neighbors.h5 file.
+source("src/read_neighbors.R")
+# flavor_algorithm_id(): map a --flavor name to a Seurat FindClusters algorithm id.
+source("src/flavor.R")
 
 # arg parsing
 source("src/common/cli.R")
@@ -34,7 +18,7 @@ p <- arg_parser("CLUST module")
 p <- add_base_args(p)                      # --output_dir, --name
 p <- add_stage_args(p, "CLUST")  # the stage I/O contract
 # your own method params — argparser directly (its add_argument requires `help`):
-p <- add_argument(p, "--modularity_algorithm", type = "character", help = "Clustering algorithm")
+p <- add_argument(p, "--flavor", type = "character", help = "Clustering algorithm (louvain_original|louvain_multilevel_refinement|slm|leiden)")
 p <- add_argument(p, "--resolution", type = "numeric", help = "Clustering resolution")
 p <- add_argument(p, "--random_seed", type = "integer", help = "Random seed")
 args <- parse_args(p)                      # argparser's own parser
@@ -69,19 +53,9 @@ so <- CreateSeuratObject(
 so@graphs$neighbors <- neighbors_graph
 
 
-# Algorithm name mapping to Seurat ID (1,2,3, or 4)
-alg_map <- list(
-  louvain_original = 1,
-  louvain_multilevel_refinement = 2,
-  slm = 3,
-  leiden = 4
-)
-
-if (!(args$modularity_algorithm %in% names(alg_map))) {
-  stop("Invalid modularity_algorithm specified")
-}
-
-algorithm_seurat_id <- alg_map[[args$modularity_algorithm]]
+# Map the requested --flavor to a Seurat FindClusters algorithm id (errors if
+# --flavor is missing or unknown).
+algorithm_seurat_id <- flavor_algorithm_id(args$flavor)
 
 
 # Run clustering
@@ -95,7 +69,7 @@ so <- FindClusters(
 )
 
 cat("Running clustering...\n")
-cat("Selected algorithm:", args$modularity_algorithm, "\n")
+cat("Selected algorithm:", args$flavor, "\n")
 cat("Algorithm ID:", algorithm_seurat_id, "\n\n")
 
 
