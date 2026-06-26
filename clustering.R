@@ -1,92 +1,51 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages({
-  library(argparse)
   library(HDF5Array)
   library(Seurat)
   library(Matrix)
 })
 
-# Parse command line arguments
-parser <- ArgumentParser(description = "Seurat Clustering Module")
+# read_neighbors(): load a CSR neighbors graph from a *_neighbors.h5 file.
+source("src/read_neighbors.R")
+  
+  sparseMatrix(
+    p    = h5read(path, paste0(group, "/indptr")),
+    j    = h5read(path, paste0(group, "/indices")),  # 0-based column indices
+    x    = as.numeric(h5read(path, paste0(group, "/data"))),
+    dims = c(n, n),
+    index1   = FALSE,
+    dimnames = list(ids, ids)
+  )
+}
 
-# Required by OmniBenchmark
-parser$add_argument(
-  "--output_dir",
-  dest = "output_dir",
-  type = "character",
-  required = TRUE,
-  help = "Output directory for results"
-)
+# arg parsing
+source("src/common/cli.R")
+p <- arg_parser("CLUST module")
+p <- add_base_args(p)                      # --output_dir, --name
+p <- add_stage_args(p, "CLUST")  # the stage I/O contract
+# your own method params — argparser directly (its add_argument requires `help`):
+p <- add_argument(p, "--modularity_algorithm", type = "character", help = "Clustering algorithm")
+p <- add_argument(p, "--resolution", type = "numeric", help = "Clustering resolution")
+p <- add_argument(p, "--random_seed", type = "integer", help = "Random seed")
+args <- parse_args(p)                      # argparser's own parser
 
-parser$add_argument(
-  "--name",
-  dest = "name",
-  type = "character",
-  required = TRUE,
-  help = "Module name/identifier"
-)
-
-# Stage-specific inputs
-parser$add_argument(
-  "--neighbors.h5",
-  dest = "neighbors_h5",
-  type = "character",
-  nargs = "+",
-  required = TRUE,
-  help = "Input neighbors graph"
-)
-
-parser$add_argument(
-  "--modularity_algorithm",
-  dest = "modularity_algorithm",
-  type = "character",
-  required = TRUE,
-  help = "Clustering algorithm"
-)
-
-parser$add_argument(
-  "--resolution",
-  dest = "resolution",
-  type = "double",
-  help = "Clustering resolution"
-)
-
-parser$add_argument(
-  "--seed",
-  dest = "seed",
-  type = "integer",
-  default = 42,
-  help = "Random seed"
-)
-
-args <- parser$parse_args()
+# logging
+cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
+cat(sprintf("LOG: command line args\n----------------------------------\n"))
+for (i in 1:length(args)) {
+  cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
+}
+cat(sprintf("----------------------------------\n"))
 
 
 # Reproducibility
-set.seed(args$seed)
-
-# Parameters
-cat("Full command:\n")
-cat(paste0(commandArgs(), collapse = " "), "\n\n")
-
-cat("neighbors_h5:", args$neighbors_h5, "\n")
-cat("output_dir:", args$output_dir, "\n")
-cat("name:", args$name, "\n")
-cat("modularity_algorithm:", args$modularity_algorithm, "\n")
-cat("resolution:", args$resolution, "\n")
-cat("seed:", args$seed, "\n\n")
-
+set.seed(args$random_seed)
 
 # Load neighbors graph into Seurat Object
-neighbors_mat <- TENxMatrix(
-  args$neighbors_h5,
-  group = "matrix"
-)
+neighbors_h5 <- read_neighbors(args$neighbors_h5)
 
-neighbors_mat <- as(neighbors_mat, "dgCMatrix")
-
-neighbors_graph <- as.Graph(neighbors_mat)
+neighbors_graph <- as.Graph(neighbors_h5)
 
 cat("Neighbors graph dimensions:\n")
 print(dim(neighbors_graph))
