@@ -4,6 +4,7 @@ entrypoints:
   select: select.R
   integrate: integrate.R
   pca: pca.R
+  cluster: cluster.R
 
 # Shared CLI helpers (R) vendored under src/common/ via `pixi run -e bootstrap sync`.
 templates:
@@ -17,4 +18,4 @@ benchmarks:
   - name: split-stages
     repo: https://github.com/omni-scrna/split-stages-plan
     plan: benchmark_conda.yaml
-    ref: feat/contract-fixtures
+    ref: new-stage-naming

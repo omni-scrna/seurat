@@ -13,12 +13,33 @@ suppressPackageStartupMessages({
   library(yaml)
 })
 
-script_dir <- (function() {
-  cargs <- commandArgs(trailingOnly = FALSE)
-  m <- grep("^--file=", cargs)
-  if (length(m) > 0) dirname(sub("^--file=", "", cargs[[m]])) else getwd()
-})()
-source(file.path(script_dir, "src", "cli.R"))
+# arg parsing
+source("src/common/cli.R")
+p <- arg_parser("FEAT module")
+p <- add_base_args(p)                    # --output_dir, --name
+p <- add_stage_args(p, "FEAT")     # the stage I/O contract
+# your own method params — argparser directly (its add_argument requires `help`):
+p <- add_argument(p, "--selection_type", type = "character", help = "type of feature selection")
+p <- add_argument(p, "--number_selected", type = "integer", help = "number of PCs")
+args <- parse_args(p)                    # argparser's own parser
+
+
+
+# from properties input, get batch variable
+props <- yaml::read_yaml(args$properties_info)
+if (is.null(props$batch_var) || props$batch_var == "") {
+  stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
+}
+args$batch_variable <- props$batch_var
+
+# logging
+cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
+cat(sprintf("LOG: command line args\n----------------------------------\n"))
+for (i in 1:length(args)) {
+  cat(sprintf("  %s: %s\n", names(args)[i], args[[i]]))
+}
+cat(sprintf("----------------------------------\n"))
+
 
 run_select <- function(args) {
   so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
@@ -51,18 +72,11 @@ run_select <- function(args) {
 }
 
 main <- function() {
-  args <- parse_select_args()
-  cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
-  for (k in c("output_dir", "name", "input_h5", "rawdata_h5ad",
-              "filtered_cellids", "selection_type", "number_selected", "batch_variable")) {
-    cat(sprintf("  %s: %s\n", k, args[[k]]))
-  }
-
   dir.create(args$output_dir, showWarnings = FALSE, recursive = TRUE)
 
   sel_feats <- run_select(args)
 
-  m <- TENxMatrix(args$input_h5, group = "matrix")
+  m <- TENxMatrix(args$normalized_h5, group = "matrix")
   m <- as(m, "dgCMatrix")
 
   out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))

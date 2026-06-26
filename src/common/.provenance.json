@@ -2,25 +2,30 @@
   "engine": {
     "repo": "https://github.com/omni-scrna/boilerplate",
     "ref": "main",
-    "commit": "22378ebb405d6a2596813f4309eeee6109d3b64e",
-    "version": "0.1.0",
+    "commit": "8a8ba8524939b49db1179b2da5687f99cceeb91b",
+    "version": null,
     "lang": "r"
   },
   "schemas": [
     {
       "benchmark": "split-stages",
       "repo": "https://github.com/omni-scrna/split-stages-plan",
-      "ref": "feat/contract-fixtures",
-      "commit": "04cb58868a9081c7f60e8eb1c80b0a6c6fd64193",
+      "ref": "new-stage-naming",
+      "commit": "71299d682247f59d2d5b1162288b7e280b15fb9a",
       "files": [
-        "_base",
-        "five-pca",
-        "nngraph",
-        "six-embedding-metrics",
-        "three-normalize",
-        "two-filter"
+        "ANNO",
+        "CLUST-M",
+        "CLUST",
+        "EMBED-M",
+        "FEAT",
+        "FILT",
+        "INTG8",
+        "NNG",
+        "NORM",
+        "PCA",
+        "_base"
       ]
     }
   ],
-  "fetched_at": "2026-06-16T23:29:16Z"
+  "fetched_at": "2026-06-22T05:37:10Z"
 }
