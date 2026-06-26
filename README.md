@@ -11,6 +11,8 @@ pixi run check
 
 `pixi run check` loads all runtime libraries and prints `OK`. Run it after install to confirm the environment is healthy.
 
+Run the unit tests with `pixi run -e dev test`.
+
 ## Usage
 
 ### Gene selection (`select` entrypoint)
