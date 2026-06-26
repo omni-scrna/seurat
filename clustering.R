@@ -8,16 +8,6 @@ suppressPackageStartupMessages({
 
 # read_neighbors(): load a CSR neighbors graph from a *_neighbors.h5 file.
 source("src/read_neighbors.R")
-  
-  sparseMatrix(
-    p    = h5read(path, paste0(group, "/indptr")),
-    j    = h5read(path, paste0(group, "/indices")),  # 0-based column indices
-    x    = as.numeric(h5read(path, paste0(group, "/data"))),
-    dims = c(n, n),
-    index1   = FALSE,
-    dimnames = list(ids, ids)
-  )
-}
 
 # arg parsing
 source("src/common/cli.R")
