@@ -74,14 +74,8 @@ cat("Algorithm ID:", algorithm_seurat_id, "\n\n")
 
 
 # Extract clusters matrix
-m_clusters <- matrix(
-  as.character(so$seurat_clusters),
-  nrow = 1,
-  dimnames = list(
-    "clusters",
-    colnames(so)
-  )
-)
+m_clusters <- data.frame(cell_ids, = colnames(so),
+                         cluster = as.character(so$seurat_clusters))
 
 cat("Cluster matrix dimensions:\n")
 print(dim(m_clusters))
@@ -97,12 +91,11 @@ cat("Writing output to:\n")
 cat(output_file, "\n\n")
 
 write.table(
-  t(m_clusters),
+  m_clusters,
   file = output_file,
   sep = "\t",
   quote = FALSE,
-  row.names = TRUE,
-  col.names = NA
+  row.names = FALSE
 )
 
 print(file.info(output_file)[, c("size", "ctime")])
