@@ -39,5 +39,15 @@ curl = "*"
 [feature.bootstrap.tasks]
 sync = "sh -c 'curl -fsSL https://raw.githubusercontent.com/omni-scrna/boilerplate/${BRANCH:-main}/scripts/pull.py | python -'"
 
+# Test tooling, kept out of the default runtime env. The `dev` environment layers
+# r-testthat on top of the default R stack (rhdf5/Matrix/Seurat), so the tests can
+# source src/ and exercise the real readers:  pixi run -e dev test
+[feature.test.dependencies]
+r-testthat = "*"
+
+[feature.test.tasks]
+test = "Rscript -e 'testthat::test_dir(\"tests/testthat\", stop_on_failure = TRUE)'"
+
 [environments]
 bootstrap = { features = ["bootstrap"], no-default-feature = true }
+dev = { features = ["test"] }
