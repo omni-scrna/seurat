@@ -10,7 +10,7 @@ suppressPackageStartupMessages({
 source("src/read_neighbors.R")
 
 # arg parsing
-source("src/common/cli.R")
+source("src/cli.R")
 p <- arg_parser("CLUST module")
 p <- add_base_args(p)                      # --output_dir, --name
 p <- add_stage_args(p, "CLUST")  # the stage I/O contract
