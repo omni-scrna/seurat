@@ -44,7 +44,9 @@ run_normalize <- function(args) {
     set.seed(args$random_seed)
     so <- SCTransform(so, vst.flavor = "v2", method = "glmGamPoi", 
                       verbose = FALSE, return.only.var.genes = FALSE)
-    m <- GetAssayData(so, assay = "SCT", layer = "scale.data")
+    m <- GetAssayData(so, assay = "SCT", layer = "data")
+    # layer = "data" for log1p(corrected UMI)
+    # layer = "scale.data" for Pearson residuals
   } else {
     stop("Unsupported flavor: ", args$flavor)
   }
