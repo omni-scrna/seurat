@@ -23,15 +23,6 @@ p <- add_argument(p, "--selection_type", type = "character", help = "type of fea
 p <- add_argument(p, "--number_selected", type = "integer", help = "number of PCs")
 args <- parse_args(p)                    # argparser's own parser
 
-
-
-# from properties input, get batch variable
-props <- yaml::read_yaml(args$properties_info)
-if (is.null(props$batch_var) || props$batch_var == "") {
-  stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
-}
-args$batch_variable <- props$batch_var
-
 # logging
 cat(sprintf("Full command: %s\n", paste(commandArgs(trailingOnly = FALSE), collapse = " ")))
 cat(sprintf("LOG: command line args\n----------------------------------\n"))
@@ -40,6 +31,12 @@ for (i in 1:length(args)) {
 }
 cat(sprintf("----------------------------------\n"))
 
+# from properties input, get batch variable
+props <- yaml::read_yaml(args$properties_info)
+if (is.null(props$batch_var) || props$batch_var == "") {
+  stop("batch_var is required in properties.info for selection_type 'seurat_vst_batch'")
+}
+args$batch_variable <- props$batch_var
 
 run_select <- function(args) {
   so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
