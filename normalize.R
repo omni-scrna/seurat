@@ -34,8 +34,7 @@ run_normalize <- function(args) {
   plan(sequential)
 
   so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
-  # potential: Feature names were replaced with dashes ('-')
-
+  DefaultAssay(so) <- "RNA"
   cellids <- readLines(gzfile(args$filtered_cellids))
   so <- subset(so, cells = cellids)
   cat(sprintf("  dim(so) after filtering: %d x %d\n", nrow(so), ncol(so)))
@@ -43,10 +42,18 @@ run_normalize <- function(args) {
   if (args$flavor == "sctransformv2") {
     set.seed(args$random_seed)
     so <- SCTransform(so, vst.flavor = "v2", method = "glmGamPoi", 
-                      verbose = FALSE, return.only.var.genes = FALSE)
+                      assay = "RNA", new.assay.name = "SCT",
+                      verbose = FALSE, return.only.var.genes = FALSE,
+                      min_cells = 0)
     m <- GetAssayData(so, assay = "SCT", layer = "data")
     # layer = "data" for log1p(corrected UMI)
     # layer = "scale.data" for Pearson residuals
+    rna_features <- rownames(so[["RNA"]])
+    sct_features <- rownames(m)
+
+    stopifnot(length(rna_features) == nrow(m))
+    stopifnot(identical(gsub("_", "-", rna_features, fixed = TRUE), sct_features))
+    rownames(m) <- rna_features
   } else {
     stop("Unsupported flavor: ", args$flavor)
   }
