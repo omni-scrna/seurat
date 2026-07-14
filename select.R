@@ -42,7 +42,8 @@ args$batch_variable <- props$batch_var
 run_select <- function(args) {
   so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
   cellids <- readLines(gzfile(args$filtered_cellids))
-  so <- subset(so, cells = cellids)
+  featureids <- readLines(gzfile(args$filtered_featureids))
+  so <- subset(so, cells = cellids, features = featureids)
   cat(sprintf("  dim(so) after filtering: %d x %d\n", nrow(so), ncol(so)))
 
   if (args$selection_type == "seurat_vst") {
@@ -76,6 +77,12 @@ main <- function() {
 
   m <- TENxMatrix(args$normalized_h5, group = "matrix")
   m <- as(m, "dgCMatrix")
+  
+  missing_feats <- setdiff(sel_feats, rownames(m))
+  if (length(missing_feats) > 0) {
+    stop(sprintf("sel_feats contains %d gene(s) not present in normalized_h5: %s",
+                  length(missing_feats), paste(head(missing_feats, 5), collapse = ", ")))
+  }
 
   out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))
   cat("output_file:", out, "\n")
