@@ -36,7 +36,8 @@ run_normalize <- function(args) {
   so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
   DefaultAssay(so) <- "RNA"
   cellids <- readLines(gzfile(args$filtered_cellids))
-  so <- subset(so, cells = cellids)
+  featureids <- readLines(gzfile(args$filtered_featureids))
+  so <- subset(so, cells = cellids, features = featureids)
   cat(sprintf("  dim(so) after filtering: %d x %d\n", nrow(so), ncol(so)))
 
   if (args$flavor == "sctransformv2") {
