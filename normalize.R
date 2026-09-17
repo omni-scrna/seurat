@@ -66,6 +66,10 @@ main <- function() {
   dir.create(args$output_dir, showWarnings = FALSE, recursive = TRUE)
 
   m <- run_normalize(args)
+  cat("dimension (before variance filtering):", dim(m), "\n")
+  rv <- rowVars(m)<1e-10
+  m <- m[!rv,]
+  cat("dimension (after variance filtering):", dim(m), "\n")
   out <- file.path(args$output_dir, paste0(args$name, "_normalized.h5"))
   cat("output_file:", out, "\n")
   writeTENxMatrix(m, out, group = "matrix")
