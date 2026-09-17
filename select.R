@@ -88,7 +88,9 @@ main <- function() {
 
   out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))
   cat("output_file:", out, "\n")
-  writeTENxMatrix(m[sel_feats, ], out, group = "matrix")
+  m <- m[sel_feats,]
+  stopifnot(all(rowVars(m)>1e-10))  # assertion that all features written have non-zero variance
+  writeTENxMatrix(m, out, group = "matrix")
   cat(sprintf("  wrote: %s\n", out))
   print(file.info(out)[, c("size", "ctime")])
 }
