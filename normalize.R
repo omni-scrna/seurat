@@ -72,6 +72,7 @@ main <- function() {
   cat("dimension (after variance filtering):", dim(m), "\n")
   out <- file.path(args$output_dir, paste0(args$name, "_normalized.h5"))
   cat("output_file:", out, "\n")
+  stopifnot(all(rowVars(m)>1e-10))  # assertion that all features written have non-zero variance
   writeTENxMatrix(m, out, group = "matrix")
   cat(sprintf("  wrote: %s\n", out))
   print(file.info(out)[, c("size", "ctime")])
