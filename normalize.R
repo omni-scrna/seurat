@@ -45,7 +45,7 @@ run_normalize <- function(args) {
     so <- SCTransform(so, vst.flavor = "v2", method = "glmGamPoi", 
                       assay = "RNA", new.assay.name = "SCT",
                       verbose = FALSE, return.only.var.genes = FALSE,
-                      min_cells = 0)
+                      min_cells = 5)
     m <- GetAssayData(so, assay = "SCT", layer = "data")
     # layer = "data" for log1p(corrected UMI)
     # layer = "scale.data" for Pearson residuals
