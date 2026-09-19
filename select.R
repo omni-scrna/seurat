@@ -41,11 +41,11 @@ for (i in 1:length(args)) {
 cat(sprintf("----------------------------------\n"))
 
 
-run_select <- function(args) {
+run_select <- function(args, norm_features) {
   so <- read_h5ad(args$rawdata_h5ad, as = "Seurat")
   cellids <- readLines(gzfile(args$filtered_cellids))
   featureids <- readLines(gzfile(args$filtered_featureids))
-  so <- subset(so, cells = cellids, features = featureids)
+  so <- subset(so, cells = cellids, features = intersect(featureids, norm_features))
   cat(sprintf("  dim(so) after filtering: %d x %d\n", nrow(so), ncol(so)))
 
   if (args$selection_type == "seurat_vst") {
@@ -75,10 +75,10 @@ run_select <- function(args) {
 main <- function() {
   dir.create(args$output_dir, showWarnings = FALSE, recursive = TRUE)
 
-  sel_feats <- run_select(args)
-
   m <- TENxMatrix(args$normalized_h5, group = "matrix")
   m <- as(m, "dgCMatrix")
+
+  sel_feats <- run_select(args, norm_features = rownames(m))
 
   missing_feats <- setdiff(sel_feats, rownames(m))
   if (length(missing_feats) > 0) {
@@ -88,7 +88,9 @@ main <- function() {
 
   out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))
   cat("output_file:", out, "\n")
-  writeTENxMatrix(m[sel_feats, ], out, group = "matrix")
+  m <- m[sel_feats,]
+  stopifnot(all(rowVars(m)>1e-10))  # assertion that all features written have non-zero variance
+  writeTENxMatrix(m, out, group = "matrix")
   cat(sprintf("  wrote: %s\n", out))
   print(file.info(out)[, c("size", "ctime")])
 }

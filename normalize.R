@@ -45,7 +45,7 @@ run_normalize <- function(args) {
     so <- SCTransform(so, vst.flavor = "v2", method = "glmGamPoi", 
                       assay = "RNA", new.assay.name = "SCT",
                       verbose = FALSE, return.only.var.genes = FALSE,
-                      min_cells = 0)
+                      min_cells = 5)
     m <- GetAssayData(so, assay = "SCT", layer = "data")
     # layer = "data" for log1p(corrected UMI)
     # layer = "scale.data" for Pearson residuals
@@ -66,8 +66,13 @@ main <- function() {
   dir.create(args$output_dir, showWarnings = FALSE, recursive = TRUE)
 
   m <- run_normalize(args)
+  cat("dimension (before variance filtering):", dim(m), "\n")
+  rv <- rowVars(m)<1e-10
+  m <- m[!rv,]
+  cat("dimension (after variance filtering):", dim(m), "\n")
   out <- file.path(args$output_dir, paste0(args$name, "_normalized.h5"))
   cat("output_file:", out, "\n")
+  stopifnot(all(rowVars(m)>1e-10))  # assertion that all features written have non-zero variance
   writeTENxMatrix(m, out, group = "matrix")
   cat(sprintf("  wrote: %s\n", out))
   print(file.info(out)[, c("size", "ctime")])
