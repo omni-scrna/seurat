@@ -4,6 +4,9 @@
 # Supported selection_type values:
 #   seurat_vst       — per-dataset VST (FindVariableFeatures)
 #   seurat_vst_batch — per-batch VST aggregated with SelectIntegrationFeatures
+#   mixhvg           — mixture of HVG methods (scran, scran_pos, seuratv1) via
+#                      mixhvg::FindVariableFeaturesMix on raw counts
+#                      (https://github.com/RuzhangZhao/mixhvg)
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -67,6 +70,12 @@ run_select <- function(args, norm_features) {
       seurat_list,
       nfeatures = args$number_selected
     )
+  } else if (args$selection_type == "mixhvg") {
+    suppressPackageStartupMessages(library(mixhvg))
+    counts <- LayerData(so, layer = "counts")
+    sel_feats <- FindVariableFeaturesMix(counts,
+      method.names = c("scran", "scran_pos", "seuratv1"),
+      nfeatures = args$number_selected)
   } else {
     stop("Unsupported selection_type: ", args$selection_type)
   }
