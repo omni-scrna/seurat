@@ -1,5 +1,5 @@
 [workspace]
-channels = ["conda-forge", "bioconda"]
+channels = ["conda-forge", "bioconda", "https://prefix.dev/almost-conductor"]
 name = "seurat"
 platforms = ["linux-64", "osx-arm64"]
 version = "0.1.0"
@@ -20,6 +20,11 @@ r-magrittr = "*"
 r-yaml = "*"
 r-argparser = "*"   # used by the vendored src/common/cli.R helpers
 bioconductor-glmgampoi = ">=1.22.0,<2"
+# mixhvg (selection_type: mixhvg); CRAN-only, so built into almost-conductor
+r-mixhvg = ">=1.0.1"
+bioconductor-scran = "*"
+bioconductor-scuttle = "*"
+bioconductor-singlecellexperiment = "*"
 # TODO: add r-obkit
 
 # Bootstrap tooling, kept out of the (heavy) R default env. `pixi run -e bootstrap

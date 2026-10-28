@@ -3,6 +3,7 @@ name: seurat
 channels:
 - conda-forge
 - bioconda
+- https://prefix.dev/almost-conductor
 - nodefaults
 dependencies:
 - r-base >=4.5
@@ -16,3 +17,7 @@ dependencies:
 - r-yaml *
 - r-argparser *
 - bioconductor-glmgampoi >=1.22.0,<2
+- r-mixhvg >=1.0.1
+- bioconductor-scran *
+- bioconductor-scuttle *
+- bioconductor-singlecellexperiment *
