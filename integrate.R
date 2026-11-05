@@ -23,7 +23,7 @@ p <- add_stage_args(p, "INTG8")  # the stage I/O contract
 # your own method params — argparser directly (its add_argument requires `help`):
 p <- add_argument(p, "--method", type = "character", help = "number of PCs")
 p <- add_argument(p, "--k_anchor", type = "integer", help = "number of PCs")
-args <- parse_args(p)                      # argparser's own parser
+args <- parse_args_outputs(p)                      # argparser, minus --output id=PATH (api 0.8)
 
 # from properties input, get batch variable
 props <- yaml::read_yaml(args$properties_info)
@@ -151,7 +151,7 @@ main <- function() {
   colnames(corrected) <- paste0("corrected_dim", seq_len(ncol(corrected)))
 
   # write output
-  out <- file.path(args$output_dir, paste0(args$name, "_corrected.tsv"))
+  out <- output_path(args, "corrected_tsv", "_corrected.tsv")
   fwrite(data.table(cell_id = rownames(corrected), corrected), out,
          sep = "\t", quote = FALSE, row.names = FALSE)
   cat(sprintf("  wrote: %s\n", out))
