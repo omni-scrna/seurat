@@ -19,7 +19,7 @@ p <- add_stage_args(p, "NORM")  # the stage I/O contract
 # your own method params — argparser directly (its add_argument requires `help`):
 p <- add_argument(p, "--flavor", type = "character", help = "Normalization type")
 p <- add_argument(p, "--random_seed", type = "integer", help = "random seed")
-args <- parse_args(p)                      # argparser's own parser
+args <- parse_args_outputs(p)                      # argparser, minus --output id=PATH (api 0.8)
 
 # tracking stuff
 source("src/obkit_logger.R")
@@ -70,7 +70,7 @@ main <- function() {
   rv <- rowVars(m)<1e-10
   m <- m[!rv,]
   cat("dimension (after variance filtering):", dim(m), "\n")
-  out <- file.path(args$output_dir, paste0(args$name, "_normalized.h5"))
+  out <- output_path(args, "normalized_h5", "_normalized.h5")
   cat("output_file:", out, "\n")
   stopifnot(all(rowVars(m)>1e-10))  # assertion that all features written have non-zero variance
   writeTENxMatrix(m, out, group = "matrix")

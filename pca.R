@@ -35,7 +35,7 @@ p <- add_stage_args(p, "PCA")  # the stage I/O contract
 p <- add_argument(p, "--solver", type = "character", help = "solver type")
 p <- add_argument(p, "--n_components", type = "integer", help = "number of PCs")
 p <- add_argument(p, "--random_seed", type = "integer", help = "random seed")
-args <- parse_args(p)                      # argparser's own parser
+args <- parse_args_outputs(p)                      # argparser, minus --output id=PATH (api 0.8)
 
 if (!(args$solver %in% c("exact", "approximate", "irlba", "random")))
   stop("Invalid --solver: ", args$solver, " (valid: exact, approximate)")
@@ -120,10 +120,10 @@ main <- function() {
               nrow(res$loadings),  ncol(res$loadings)))
 
   phase("write", function(attrs) {
-    out_pcas <- file.path(args$output_dir, sprintf("%s_pcas.tsv", args$name))
+    out_pcas <- output_path(args, "embedding_tsv", "_pcas.tsv")
     fwrite(data.frame(cell_id = rownames(res$embedding), res$embedding), out_pcas,
            sep = "\t", quote = FALSE, row.names = FALSE)
-    out_loadings <- file.path(args$output_dir, sprintf("%s_loadings.tsv", args$name))
+    out_loadings <- output_path(args, "loadings_tsv", "_loadings.tsv")
     fwrite(data.frame(gene = rownames(res$loadings), res$loadings), out_loadings,
            sep = "\t", quote = FALSE, row.names = FALSE)
     attrs$pcas     <- out_pcas
