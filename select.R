@@ -24,7 +24,7 @@ p <- add_stage_args(p, "FEAT")     # the stage I/O contract
 # your own method params — argparser directly (its add_argument requires `help`):
 p <- add_argument(p, "--selection_type", type = "character", help = "type of feature selection")
 p <- add_argument(p, "--number_selected", type = "integer", help = "number of PCs")
-args <- parse_args(p)                    # argparser's own parser
+args <- parse_args_outputs(p)                    # argparser, minus --output id=PATH (api 0.8)
 
 
 
@@ -95,7 +95,7 @@ main <- function() {
                  length(missing_feats), paste(head(missing_feats, 5), collapse = ", ")))
   }
 
-  out <- file.path(args$output_dir, paste0(args$name, "_normalized_selected.h5"))
+  out <- output_path(args, "normalized_selected_h5", "_normalized_selected.h5")
   cat("output_file:", out, "\n")
   m <- m[sel_feats,]
   stopifnot(all(rowVars(m)>1e-10))  # assertion that all features written have non-zero variance
